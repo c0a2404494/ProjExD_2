@@ -1,4 +1,5 @@
 import os
+import math
 import random
 import sys
 import time
@@ -59,6 +60,10 @@ def gameover(screen: pg.Surface) -> None:
 
 
 def init_bb_imgs() -> tuple[list[pg.Surface], list[int]]:
+    """
+    無限に拡大，加速するのはおかしいので，10段階程度の大きさ，
+    加速度を準備する
+    """
     bb_accs = [a for a in range(1,11)]
     bb_imgs = []
     for i in range(1, 11):
@@ -70,13 +75,16 @@ def init_bb_imgs() -> tuple[list[pg.Surface], list[int]]:
 
 
 
+
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
     bg_img = pg.image.load("fig/pg_bg.jpg")    
     kk_img = pg.transform.rotozoom(pg.image.load("fig/3.png"), 0, 0.9)
     kk_rct = kk_img.get_rect()
+    sum_mv = (0, 0)
     kk_rct.center = 300, 200
+ 
     bb_img = pg.Surface((20, 20))  # 空のSurfaceを作る（爆弾用）
     pg.draw.circle(bb_img, (255, 0, 0), (10, 10), 10)  # 赤い円を描く
     bb_img.set_colorkey((0, 0, 0))  # 黒を透明色に設定
