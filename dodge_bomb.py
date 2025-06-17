@@ -58,6 +58,15 @@ def gameover(screen: pg.Surface) -> None:
     time.sleep(5)
 
 
+def init_bb_imgs() -> tuple[list[pg.Surface], list[int]]:
+    bb_accs = [a for a in range(1,11)]
+    bb_imgs = []
+    for i in range(1, 11):
+        bb_img = pg.Surface((20*i, 20*i))
+        bb_img.set_colorkey((0, 0, 0))
+        pg.draw.circle(bb_img, (255, 0, 0), (10*i, 10*i), 10*i)
+        bb_imgs.append(bb_img)
+    return bb_imgs, bb_accs
 
 
 
@@ -74,6 +83,7 @@ def main():
     bb_rct = bb_img.get_rect()  # 爆弾Rectを取得
     bb_rct.centerx = random.randint(0, WIDTH)  # 横座標用の乱数
     bb_rct.centery = random.randint(0, HEIGHT)  # 縦座標用の乱数
+    bb_imgs, bb_accs = init_bb_imgs()
     vx, vy = +5, +5  # 爆弾の移動速度
     clock = pg.time.Clock()
     tmr = 0
@@ -85,7 +95,11 @@ def main():
         if kk_rct.colliderect(bb_rct):
             gameover(screen)
             return
-    
+        
+        bb_imgs, bb_accs = init_bb_imgs()
+        avx = vx*bb_accs[min(tmr//500, 9)]
+        bb_img = bb_imgs[min(tmr//500, 9)]
+
         screen.blit(bg_img, [0, 0]) 
 
         key_lst = pg.key.get_pressed()
@@ -106,7 +120,12 @@ def main():
         if check_bound(kk_rct) != (True, True):
             kk_rct.move_ip(-sum_mv[0], -sum_mv[1])  # 移動をなかったことにする
         screen.blit(kk_img, kk_rct)
-        bb_rct.move_ip(vx, vy)  # 爆弾の移動
+        idx = min(tmr // 500, 9)
+        avx = vx * bb_accs[idx]
+        avy = vy * bb_accs[idx]
+        bb_img = bb_imgs[idx]
+        bb_rct = bb_img.get_rect(center=bb_rct.center)
+        bb_rct.move_ip(avx, avy)  # 爆弾の移動
         yoko, tate = check_bound(bb_rct)
         if not yoko:  # 横方向にはみ出ていたら
             vx *= -1
